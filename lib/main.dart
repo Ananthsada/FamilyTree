@@ -55,3 +55,12 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
+
+class FamilyMember extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Text("New Member"),
+    );
+  }
+}

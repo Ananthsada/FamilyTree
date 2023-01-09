@@ -2,21 +2,33 @@ import 'package:flutter/material.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: Home()
+    home: Test()
   ));
 }
 
-class Home extends StatelessWidget {
+class Test extends StatefulWidget {
+  @override
+  _TestState createState() => _TestState();
+}
+
+class _TestState extends State<Test> {
+
+  List<String> quote = [
+    'One',
+    'Two',
+    'Three'
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.grey,
         title: Text('Family Tree'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(30.0),
-        child: Text('hello'),
+      body: Column(
+        children: quote.map((e) => Text(e)).toList(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: null,

@@ -7,6 +7,8 @@ class GraphView extends StatefulWidget {
 }
 
 class GraphViewState extends State<GraphView> {
+  List<NodeWidget> nodeList = [];
+
   @override
   Widget build(BuildContext context) {
     return NodeWidget();
@@ -29,3 +31,14 @@ class Node {
   String name = "Node";
 }
 
+class MyPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}

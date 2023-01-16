@@ -1,4 +1,4 @@
-
+import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class GraphView extends StatefulWidget {
@@ -7,38 +7,49 @@ class GraphView extends StatefulWidget {
 }
 
 class GraphViewState extends State<GraphView> {
-  List<NodeWidget> nodeList = [];
+  List<Node> familyMembers = [];
+
+  GraphViewState() {
+    familyMembers.add(Node('Ned', 'Stark'));
+    familyMembers.add(Node('Catelyn', 'Tully'));
+  }
 
   @override
   Widget build(BuildContext context) {
-    return NodeWidget();
+    return Container(
+      child: CustomPaint(
+        child: Container(),
+        painter: GraphViewPainter(),),
+    );
   }
 }
 
-class NodeWidget extends StatelessWidget {
+class GraphViewPainter extends CustomPainter {
   @override
-  Widget build(BuildContext context) {
-    return Container(child: Text("TestNode"),);
+  void paint(Canvas canvas, Size size) {
+    canvas.drawPaint(Paint()..color = Colors.blue);
   }
-}
 
-class Graph {
-  List<Node> nodeList = [];
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 class Node {
-  int nodeId = 1234;
-  String name = "Node";
+  String name = "Unknown";
+  String houseBorn = "Unkown";
+
+  Node(this.name, this.houseBorn);
 }
 
-class MyPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
+class NodeWidget extends StatelessWidget {
+  final Node node;
 
-  }
+  NodeWidget(this.node);
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+  Widget build(BuildContext context) {
+    return Card(
+      child: Text(node.name),
+    );
   }
 }

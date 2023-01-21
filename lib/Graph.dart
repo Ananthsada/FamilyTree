@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
 
 class GraphView extends StatefulWidget {
@@ -17,21 +18,48 @@ class GraphViewState extends State<GraphView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: CustomPaint(
-        child: Container(),
-        painter: GraphViewPainter(),),
+      child: _GraphView(child: Text("Tesing"))
     );
   }
 }
 
-class GraphViewPainter extends CustomPainter {
+class _GraphView extends MultiChildRenderObjectWidget {
+  _GraphView({
+    required Widget child
+  }) : super(children: [child]);
+
   @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawPaint(Paint()..color = Colors.blue);
+  RenderObject createRenderObject(BuildContext context) {
+    return __GraphView();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
+    // TODO: implement updateRenderObject
+    super.updateRenderObject(context, renderObject);
+  }
+}
+
+class _GraphViewParentData extends ContainerBoxParentData<RenderBox> {
+   /// if we are to implement flex, we'll set it here like
+   /// int flex;
+}
+
+class __GraphView extends RenderBox
+  with ContainerRenderObjectMixin<RenderBox, _GraphViewParentData>,
+  RenderBoxContainerDefaultsMixin<RenderBox, _GraphViewParentData> {
+  
+    @override
+  void setupParentData(covariant RenderObject child) {
+    if (child.parentData is! _GraphViewParentData) {
+       child.parentData = _GraphViewParentData();
+   }
+  }
+
+   @override
+    Size computeDryLayout(BoxConstraints constraints) {
+      return Size(constraints.maxWidth, constraints.maxHeight);
+    }
 }
 
 class Node {

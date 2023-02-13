@@ -132,9 +132,9 @@ class Family:
 		family members infos about this union.
 
 		"""
-		if len(h.parents) != 2:
-			print('error: number of parents != 2')
-			return
+		# if len(h.parents) != 2:
+			# print('error: number of parents != 2, len=' + str(len(h.parents)))
+			# return
 
 		h.id = len(self.households)
 		self.households.append(h)
@@ -175,7 +175,7 @@ class Family:
 			elif line[0] == '#':
 				continue
 			else:
-				if line[0] == '\t':
+				if line[0] == '\t' or line[0] == ' ':
 					p = self.add_person(line[1:])
 					p.parents = h.parents
 					h.kids.append(p)
@@ -218,8 +218,10 @@ class Family:
 		"""Returns the spouse or husband of a person in a union.
 
 		"""
-		return	household.parents[0] == person \
-				and household.parents[1] or household.parents[0]
+		if len(household.parents) > 1:
+			return household.parents[0] == person and household.parents[1] or household.parents[0]
+		else:
+			return household.parents[0]
 
 	def display_generation(self, gen):
 		"""Outputs an entire generation in DOT format.
@@ -322,8 +324,7 @@ def main():
 
 	"""
 	# Parse command line options
-	parser = argparse.ArgumentParser(description=
-			 'Generates a family tree graph from a simple text file')
+	parser = argparse.ArgumentParser(description='Generates a family tree graph from a simple text file')
 	parser.add_argument('-a', dest='ancestor',
 						help='make the family tree from an ancestor (if '+
 						'omitted, the program will try to find an ancestor)')
@@ -335,6 +336,10 @@ def main():
 	family = Family()
 
 	# Populate the family
+	#print("out")
+	#print(args.input)
+	#print("in")
+
 	f = open(args.input, 'r', encoding='utf-8')
 	family.populate(f)
 	f.close()

@@ -1,0 +1,10 @@
+Ned Stark (M)
+Catelyn Stark (F)
+    Rob Stark (M)
+    Sansa Stark (F)
+    Brandon Stark (M)
+    Arya Stark (F)
+    Rickon Stark (M)
+
+Ned Stark (M)
+    Jon Snow (M)

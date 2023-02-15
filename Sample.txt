@@ -8,3 +8,7 @@ Catelyn Stark (F)
 
 Ned Stark (M)
     Jon Snow (M)
+
+Hoster Tully (M)
+    Catelyn Stark (F)
+    Edmure Tully (M)

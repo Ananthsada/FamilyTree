@@ -27,6 +27,7 @@ class Person:
 		self.attr = {}
 		self.parents = []
 		self.households = []
+		self.layer = 1000
 
 		desc = desc.strip()
 		if '(' in desc and ')' in desc:
@@ -72,8 +73,14 @@ class Person:
 			label += '\\n' + str(self.attr['notes'])
 		opts = ['label="' + label + '"']
 		opts.append('style=filled')
-		opts.append('fillcolor=' + ('F' in self.attr and 'bisque' or
-					('M' in self.attr and 'azure2' or 'white')))
+		if 'F' in self.attr:
+			opts.append('fillcolor=bisque')
+		elif 'M' in self.attr:
+			opts.append('fillcolor=azure2')
+		elif 'UF' in self.attr:
+			opts.append('fillcolor=white')
+		elif 'UM' in self.attr:
+			opts.append('fillcolor=cyan')
 		return self.id + '[' + ','.join(opts) + ']'
 
 class Household:
@@ -144,15 +151,19 @@ class Family:
 				p.households.append(h)
 	def create_spouse(self, spouse, household):
 		name = spouse.name + "_spouse" + str(household.id)
-		sex = "M"
-		if spouse.attr["M"]:
-			sex = "F"
+		sex = "UM"
+		if 'M' in spouse.attr:
+			sex = "UF"
 		person_obj = self.add_person(name + "(" + sex + ")")
 		household.parents.append(person_obj)
 
-	def validate_household(self, h):
-		if len(h.parents) != 2:
-			self.create_spouse(h.parents[0], h)
+	def validate_household(self, household):
+		if len(household.parents) != 2:
+			self.create_spouse(household.parents[0], household)
+		else:
+			layer = min(household.parents[0].layer, household.parents[1].layer)
+			household.parents[0].layer = layer
+			household.parents[1].layer = layer
 
 	def find_person(self, name):
 		"""Tries to find a person matching the 'name' argument.
@@ -191,6 +202,8 @@ class Family:
 				if line[0] == '\t' or line[0] == ' ':
 					person_obj = self.add_person(line[1:])
 					person_obj.parents = household_obj.parents
+					if len(household_obj.parents) > 0:
+						person_obj.layer -= 1
 					household_obj.kids.append(person_obj)
 				else:
 					person_obj = self.add_person(line)
@@ -206,9 +219,19 @@ class Family:
 		would be to return the one with the highest number of descendant.
 		
 		"""
-		for p in self.everybody.values():
-			if len(p.parents) == 0:
-				return p
+		chosen_person = []
+		layer = 0
+		for person in self.everybody.values():
+			if person in chosen_person:
+				continue
+			for each in person.households:
+				if Family.get_spouse(each, person) not in chosen_person:
+					if layer <= person.layer:
+						chosen_person.append(person)
+						layer = person.layer
+						break
+		
+		return chosen_person
 
 	def next_generation(self, gen):
 		"""Takes the generation N in argument, returns the generation N+1.
@@ -231,11 +254,7 @@ class Family:
 		"""Returns the spouse or husband of a person in a union.
 
 		"""
-		if len(household.parents) > 1:
-			return household.parents[0] == person and household.parents[1] or household.parents[0]
-		else:
-			#create_parent()
-			return household.parents[0]
+		return household.parents[0] == person and household.parents[1] or household.parents[0]
 
 	def display_generation(self, gen):
 		"""Outputs an entire generation in DOT format.
@@ -316,8 +335,6 @@ class Family:
 		in DOT format.
 
 		"""
-		# Find the first households
-		gen = [ancestor]
 
 		print('digraph {\n' + \
 		      '\tnode [shape=box];\n' + \
@@ -327,9 +344,11 @@ class Family:
 			print('\t' + eachone.graphviz() + ';')
 		print('')
 
-		while gen:
-			self.display_generation(gen)
-			gen = self.next_generation(gen)
+		for each in ancestor:
+			gen = [each]
+			while gen:
+				self.display_generation(gen)
+				gen = self.next_generation(gen)
 
 		print('}')
 
@@ -366,6 +385,8 @@ def main():
 	else:
 		ancestor = family.find_first_ancestor()
 
+	#for each in ancestor:
+	 	#print(each.name)
 	# Output the graph descriptor, in DOT format
 	family.output_descending_tree(ancestor)
 

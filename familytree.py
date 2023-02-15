@@ -1,7 +1,7 @@
 """
 Run
 
-$ ./familytree.py -a 'Sample' sample.txt | dot -Tpng -o Sample.png
+$ python3 familytree.py -a 'Sample' sample.txt | dot -Tpng -o Sample.png
 
 """
 
@@ -117,13 +117,13 @@ class Family:
 		person already exists.
 
 		"""
-		p = Person(string)
-		key = p.id
+		person_obj = Person(string)
+		key = person_obj.id
 
 		if key in self.everybody:
-			self.everybody[key].attr.update(p.attr)
+			self.everybody[key].attr.update(person_obj.attr)
 		else:
-			self.everybody[key] = p
+			self.everybody[key] = person_obj
 
 		return self.everybody[key]
 
@@ -142,6 +142,17 @@ class Family:
 		for p in h.parents:
 			if not h in p.households:
 				p.households.append(h)
+	def create_spouse(self, spouse, household):
+		name = spouse.name + "_spouse" + str(household.id)
+		sex = "M"
+		if spouse.attr["M"]:
+			sex = "F"
+		person_obj = self.add_person(name + "(" + sex + ")")
+		household.parents.append(person_obj)
+
+	def validate_household(self, h):
+		if len(h.parents) != 2:
+			self.create_spouse(h.parents[0], h)
 
 	def find_person(self, name):
 		"""Tries to find a person matching the 'name' argument.
@@ -151,37 +162,39 @@ class Family:
 		if name in self.everybody:
 			return self.everybody[name]
 		# Ancestor not found in 'id', maybe it's in the 'name' field?
-		for p in self.everybody.values():
-			if p.name == name:
-				return p
+		for person in self.everybody.values():
+			if person.name == name:
+				return person
 		return None
 		
-	def populate(self, f):
+	def populate(self, file_obj):
 		"""Reads the input file line by line, to find persons and unions.
 
 		"""
-		h = Household()
+		household_obj = Household()
 		while True:
-			line = f.readline()
+			line = file_obj.readline()
 			if line == '': # end of file
-				if not h.isempty():
-					self.add_household(h)
+				if not household_obj.isempty():
+					self.validate_household(household_obj)
+					self.add_household(household_obj)
 				break
 			line = line.rstrip()
 			if line == '':
-				if not h.isempty():
-					self.add_household(h)
-				h = Household()
+				if not household_obj.isempty():
+					self.validate_household(household_obj)
+					self.add_household(household_obj)
+				household_obj = Household()
 			elif line[0] == '#':
 				continue
 			else:
 				if line[0] == '\t' or line[0] == ' ':
-					p = self.add_person(line[1:])
-					p.parents = h.parents
-					h.kids.append(p)
+					person_obj = self.add_person(line[1:])
+					person_obj.parents = household_obj.parents
+					household_obj.kids.append(person_obj)
 				else:
-					p = self.add_person(line)
-					h.parents.append(p)
+					person_obj = self.add_person(line)
+					household_obj.parents.append(person_obj)
 
 	def find_first_ancestor(self):
 		"""Returns the first ancestor found.
@@ -221,6 +234,7 @@ class Family:
 		if len(household.parents) > 1:
 			return household.parents[0] == person and household.parents[1] or household.parents[0]
 		else:
+			#create_parent()
 			return household.parents[0]
 
 	def display_generation(self, gen):
@@ -309,8 +323,8 @@ class Family:
 		      '\tnode [shape=box];\n' + \
 		      '\tedge [dir=none];\n')
 
-		for p in self.everybody.values():
-			print('\t' + p.graphviz() + ';')
+		for eachone in self.everybody.values():
+			print('\t' + eachone.graphviz() + ';')
 		print('')
 
 		while gen:
@@ -340,15 +354,15 @@ def main():
 	#print(args.input)
 	#print("in")
 
-	f = open(args.input, 'r', encoding='utf-8')
-	family.populate(f)
-	f.close()
+	file_obj = open(args.input, 'r', encoding='utf-8')
+	family.populate(file_obj)
+	file_obj.close()
 
 	# Find the ancestor from whom the tree is built
 	if args.ancestor:
 		ancestor = family.find_person(args.ancestor)
 		if not ancestor:
-			raise Exception('Cannot find person "' + args.ancestor + '"')
+			raise Exception('Ancestor  ' + args.ancestor + ' not found')
 	else:
 		ancestor = family.find_first_ancestor()
 
